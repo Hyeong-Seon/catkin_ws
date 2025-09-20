@@ -1,0 +1,7 @@
+kp: 0.6
+roi_y_ratio: 0.55
+canny_low: 50
+canny_high: 150
+gaussian_kernel: 5
+avg_window: 5
+debug: true

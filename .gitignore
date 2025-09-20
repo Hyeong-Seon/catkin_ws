@@ -1,0 +1,12 @@
+build/
+devel/
+logs/
+.catkin_tools/
+**/__pycache__/
+*.pyc
+*.swp
+install/
+log/
+.vscode/
+.ros/
+*.bag

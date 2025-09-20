@@ -1,0 +1,13 @@
+<launch>
+  <arg name="camera_topic" default="/image_jpeg/compressed" />
+  <arg name="kp" default="0.6" />
+  <arg name="debug" default="true" />
+
+  <rosparam command="load" file="$(find lane_tracking_pkg)/config/lane_params.yaml" />
+
+  <node pkg="lane_tracking_pkg" type="lane_tracking_node.py" name="lane_tracking_node" output="screen">
+    <param name="camera_topic" value="$(arg camera_topic)" />
+    <param name="kp" value="$(arg kp)" />
+    <param name="debug" value="$(arg debug)" />
+  </node>
+</launch>
