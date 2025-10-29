@@ -60,8 +60,8 @@ def detect_lane_center(edges: np.ndarray, roi_color: np.ndarray,
     y_bottom = h - 1
     y_top = int(h * 0.6)
 
-    left_line = _fit_lane(np.vstack(left_points)) if left_points else None
-    right_line = _fit_lane(np.vstack(right_points)) if right_points else None
+    left_line = _fit_lane(np.vstack(left_points), y_bottom, y_top) if left_points else None
+    right_line = _fit_lane(np.vstack(right_points), y_bottom, y_top) if right_points else None
 
     lane_positions = []
 

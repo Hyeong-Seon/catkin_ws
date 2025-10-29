@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>control_pkg</name>
+  <version>0.1.0</version>
+  <description>차량 종방향/횡방향 제어 노드 모음.</description>
+
+  <maintainer email="minsungk02@todo.todo">minsungk02</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>morai_msgs</build_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>morai_msgs</build_export_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>morai_msgs</exec_depend>
+
+  <export/>
+</package>

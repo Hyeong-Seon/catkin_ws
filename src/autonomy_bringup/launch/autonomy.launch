@@ -1,0 +1,18 @@
+<launch>
+  <!-- 카메라 -->
+  <arg name="camera_topic" default="/image_jpeg/compressed" />
+  <node pkg="perception_pkg" type="lane_tracking_node.py" name="lane_tracking_node" output="screen">
+    <param name="camera_topic" value="$(arg camera_topic)" />
+    <param name="use_compressed" value="true" />
+    <rosparam file="$(find perception_pkg)/config/lane_params.yaml" />
+  </node>
+
+  <!-- 경로 매니저 -->
+  <node pkg="planning_pkg" type="path_manager_node.py" name="path_manager" output="screen" />
+
+  <!-- 제어 노드 -->
+  <node pkg="control_pkg" type="vehicle_control_node.py" name="vehicle_control_node" output="screen" required="false" />
+
+  <!-- MORAI UDP 브릿지 -->
+  <node pkg="vehicle_interface_pkg" type="morai_udp_bridge.py" name="morai_udp_bridge" output="screen" />
+</launch>

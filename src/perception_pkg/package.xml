@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>lane_tracking_pkg</name>
-  <version>0.0.1</version>
-  <description>OpenCV 기반 라인트레킹 노드 </description>
+  <name>perception_pkg</name>
+  <version>0.1.0</version>
+  <description>카메라 기반 라인트래킹 및 객체 인지 스택.</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

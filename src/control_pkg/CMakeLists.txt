@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(lane_tracking_pkg)
+project(control_pkg)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
-  sensor_msgs
-  cv_bridge
-  image_transport
+  geometry_msgs
+  morai_msgs
 )
+
+catkin_python_setup()
 
 catkin_package()
 
 catkin_install_python(PROGRAMS
-  scripts/lane_tracking_node.py
+  scripts/vehicle_control_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

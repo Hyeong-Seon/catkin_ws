@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """차선 인지 및 스티어링 산출 노드."""
 
-import os
-import sys
 from collections import deque
 from typing import Deque, Optional, Tuple
 
@@ -21,13 +19,8 @@ try:
 except ImportError:  # pragma: no cover - 패키지 미존재 환경 대비
     HAVE_MORAI = False
 
-# vision 모듈 경로 추가
-pkg_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if pkg_path not in sys.path:
-    sys.path.append(pkg_path)
-
-from vision.preprocess import preprocess_image  # type: ignore
-from vision.detector import detect_lane_center  # type: ignore
+from perception_pkg.perception.lane.preprocess import preprocess_image
+from perception_pkg.perception.lane.detector import detect_lane_center
 
 
 class LaneTrackingNode:

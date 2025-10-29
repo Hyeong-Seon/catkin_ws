@@ -1,7 +1,8 @@
-build/
-devel/
 logs/
 .catkin_tools/
 **/__pycache__/
 *.pyc
 *.swp
+build/
+devel/
+.vscode/
