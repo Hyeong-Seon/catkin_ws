@@ -33,7 +33,7 @@ class VehicleControlNode:
         self.lookahead_gain = rospy.get_param("~lookahead_gain", 0.4)
         self.lookahead_min = rospy.get_param("~lookahead_min", 3.5)
         self.lookahead_max = rospy.get_param("~lookahead_max", 15.0)
-        self.cruise_speed_kph = rospy.get_param("~cruise_speed_kph", 30.0)
+        self.cruise_speed_kph = rospy.get_param("~cruise_speed_kph", 50.0)
         self.speed_kp = rospy.get_param("~speed_kp", 0.6)
         self.speed_ki = rospy.get_param("~speed_ki", 0.05)
         self.speed_kd = rospy.get_param("~speed_kd", 0.0)
@@ -193,10 +193,10 @@ class VehicleControlNode:
             target = min(target, self._kph_to_mps(15.0))
 
         # 신호 및 정지선 로직
-        should_stop = False
         if self.traffic_light_state in ("red", "yellow"):
-            should_stop = should_stop or self.stop_line_detected
-        if should_stop:
+            target = min(target, self._kph_to_mps(5.0))
+
+        if self.traffic_light_state in ("red", "yellow") and self.stop_line_detected:
             target = 0.0
 
         return max(target, 0.0)

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import re
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -27,7 +27,7 @@ class SpeedSignNode:
         # 파라미터
         self.camera_topic = rospy.get_param("~camera_topic", "/camera/image_raw")
         self.use_compressed = rospy.get_param("~use_compressed", False)
-        self.default_speed = float(rospy.get_param("~default_speed_limit", 30.0))
+        self.default_speed = float(rospy.get_param("~default_speed_limit", 50.0))
         self.decay_timeout = rospy.Duration.from_sec(
             float(rospy.get_param("~decay_timeout", 5.0))
         )
@@ -40,9 +40,25 @@ class SpeedSignNode:
             rospy.get_param(
                 "~speed_ranges",
                 {
+                    "speed_sign_30": [20.0, 30.0],
+                    "speed_sign_40": [30.0, 40.0],
+                    "speed_sign_50": [40.0, 50.0],
+                    "30": [20.0, 30.0],
+                    "40": [30.0, 40.0],
+                    "50": [40.0, 50.0],
                     "KR_Sign_SL_30": [20.0, 30.0],
                     "KR_Sign_SL_40": [30.0, 40.0],
                     "KR_Sign_SL_50": [40.0, 50.0],
+                },
+            )
+        )
+        self.label_speed_map = self._load_label_speed_map(
+            rospy.get_param(
+                "~label_speed_map",
+                {
+                    "speed_sign_30": 25.0,
+                    "speed_sign_40": 35.0,
+                    "speed_sign_50": 45.0,
                 },
             )
         )
@@ -57,7 +73,18 @@ class SpeedSignNode:
                 self.target_prefix[0] if self.target_prefix else "speed_sign_",
             )
             class_names_param = rospy.get_param("~pt_class_names", [])
-            class_names = tuple(str(name) for name in class_names_param) if class_names_param else None
+            class_names = (
+                tuple(str(name) for name in class_names_param) if class_names_param else None
+            )
+            label_map_param = rospy.get_param(
+                "~pt_label_map",
+                {
+                    "Speed Limit 30": "speed_sign_30",
+                    "Speed Limit 40": "speed_sign_40",
+                    "Speed Limit 50": "speed_sign_50",
+                },
+            )
+            label_map = self._load_label_map(label_map_param)
             device = rospy.get_param("~pt_device", "")
             device_arg = device if device else None
 
@@ -73,6 +100,7 @@ class SpeedSignNode:
                     iou_threshold=pt_iou_threshold,
                     label_prefix=label_prefix,
                     class_names=class_names,
+                    label_map=label_map if label_map else None,
                     device=device_arg,
                 )
                 self.detector = YoloSpeedSignPTDetector(config)
@@ -157,7 +185,9 @@ class SpeedSignNode:
         for det in detections:
             if not det.label.startswith(self.target_prefix):
                 continue
-            value = self._parse_speed(det.label)
+            value = self._limit_for_label(det.label)
+            if value is None:
+                value = self._parse_speed(det.label)
             if value is None:
                 continue
             if det.score > best_score:
@@ -197,13 +227,23 @@ class SpeedSignNode:
                 ranges[str(key)] = self._parse_range_param(value, self.default_speed)
         return ranges
 
+    def _load_label_map(self, param_dict) -> Dict[str, str]:
+        mapping: Dict[str, str] = {}
+        if isinstance(param_dict, dict):
+            for key, value in param_dict.items():
+                try:
+                    mapping[str(key)] = str(value)
+                except (TypeError, ValueError):
+                    continue
+        return mapping
+
     def _speed_range_for(self, label: str, limit: float) -> Tuple[float, float]:
+        if label in self.speed_ranges:
+            return self.speed_ranges[label]
         stripped_label = self._strip_prefix(label)
         if stripped_label in self.speed_ranges:
             return self.speed_ranges[stripped_label]
-        if limit in self.speed_ranges:
-            return self.speed_ranges[limit]
-        numeric_key = str(int(limit))
+        numeric_key = str(int(round(limit)))
         if numeric_key in self.speed_ranges:
             return self.speed_ranges[numeric_key]
         return self.default_range
@@ -213,6 +253,24 @@ class SpeedSignNode:
             if label.startswith(prefix):
                 return label[len(prefix) :]
         return label
+
+    def _load_label_speed_map(self, param_dict) -> Dict[str, float]:
+        mapping: Dict[str, float] = {}
+        if isinstance(param_dict, dict):
+            for key, value in param_dict.items():
+                try:
+                    mapping[str(key)] = float(value)
+                except (TypeError, ValueError):
+                    continue
+        return mapping
+
+    def _limit_for_label(self, label: str) -> Optional[float]:
+        if label in self.label_speed_map:
+            return self.label_speed_map[label]
+        stripped = self._strip_prefix(label)
+        if stripped in self.label_speed_map:
+            return self.label_speed_map[stripped]
+        return None
 
     def spin(self) -> None:
         rospy.spin()

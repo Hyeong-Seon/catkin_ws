@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Dict, Optional
 
 import cv2
 import numpy as np
@@ -35,7 +35,47 @@ class TrafficLightNode:
             float(rospy.get_param("~unknown_timeout", 2.0))
         )
 
-        self.detector = ObjectDetector(score_threshold=score_threshold)
+        self.pt_model_path = rospy.get_param("~pt_model_path", "")
+
+        if self.pt_model_path:
+            pt_conf_threshold = float(rospy.get_param("~pt_conf_threshold", 0.4))
+            pt_iou_threshold = float(rospy.get_param("~pt_iou_threshold", 0.45))
+            label_map_param = rospy.get_param(
+                "~pt_label_map",
+                {
+                    "Green Light": "traffic_light_green",
+                    "Red Light": "traffic_light_red",
+                },
+            )
+            label_map = self._load_label_map(label_map_param)
+            device = rospy.get_param("~pt_device", "")
+            device_arg = device if device else None
+
+            try:
+                from perception_pkg.perception.object_detection.yolo_speed_sign_pt import (
+                    YoloSpeedSignPTConfig,
+                    YoloSpeedSignPTDetector,
+                )
+
+                config = YoloSpeedSignPTConfig(
+                    model_path=self.pt_model_path,
+                    conf_threshold=pt_conf_threshold,
+                    iou_threshold=pt_iou_threshold,
+                    label_prefix="traffic_light_",
+                    label_map=label_map if label_map else None,
+                    device=device_arg,
+                )
+                self.detector = YoloSpeedSignPTDetector(config)
+                rospy.loginfo(
+                    "[traffic_light] YOLO PT detector loaded (model=%s, device=%s)",
+                    self.pt_model_path,
+                    device_arg or "auto",
+                )
+            except Exception as exc:
+                rospy.logerr("[traffic_light] YOLO PT detector 초기화 실패: %s", exc)
+                raise
+        else:
+            self.detector = ObjectDetector(score_threshold=score_threshold)
 
         self.state_pub = rospy.Publisher("/perception/traffic_light_state", String, queue_size=1)
         self.current_state = "unknown"
@@ -102,6 +142,16 @@ class TrafficLightNode:
 
     def spin(self) -> None:
         rospy.spin()
+
+    def _load_label_map(self, param_dict) -> Dict[str, str]:
+        mapping: Dict[str, str] = {}
+        if isinstance(param_dict, dict):
+            for key, value in param_dict.items():
+                try:
+                    mapping[str(key)] = str(value)
+                except (TypeError, ValueError):
+                    continue
+        return mapping
 
 
 def main() -> None:
