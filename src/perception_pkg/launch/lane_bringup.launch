@@ -1,7 +1,12 @@
 <launch>
   <arg name="camera_topic" default="/image_jpeg/compressed" />
+  <arg name="use_compressed" default="true" />
   <arg name="kp" default="0.6" />
   <arg name="debug" default="true" />
+  <arg name="default_speed_limit" default="30.0" />
+  <arg name="speed_sign_enabled" default="false" />
+  <arg name="traffic_light_enabled" default="false" />
+  <arg name="obstacle_enabled" default="false" />
 
   <rosparam command="load" file="$(find perception_pkg)/config/lane_params.yaml" />
 
@@ -9,5 +14,28 @@
     <param name="camera_topic" value="$(arg camera_topic)" />
     <param name="kp" value="$(arg kp)" />
     <param name="debug" value="$(arg debug)" />
+    <param name="use_compressed" value="$(arg use_compressed)" />
   </node>
+
+  <group if="$(arg speed_sign_enabled)">
+    <node pkg="perception_pkg" type="speed_sign_node.py" name="speed_sign_node" output="screen">
+      <param name="camera_topic" value="$(arg camera_topic)" />
+      <param name="use_compressed" value="$(arg use_compressed)" />
+      <param name="default_speed_limit" value="$(arg default_speed_limit)" />
+    </node>
+  </group>
+
+  <group if="$(arg traffic_light_enabled)">
+    <node pkg="perception_pkg" type="traffic_light_node.py" name="traffic_light_node" output="screen">
+      <param name="camera_topic" value="$(arg camera_topic)" />
+      <param name="use_compressed" value="$(arg use_compressed)" />
+    </node>
+  </group>
+
+  <group if="$(arg obstacle_enabled)">
+    <node pkg="perception_pkg" type="obstacle_detection_node.py" name="obstacle_detection_node" output="screen">
+      <param name="camera_topic" value="$(arg camera_topic)" />
+      <param name="use_compressed" value="$(arg use_compressed)" />
+    </node>
+  </group>
 </launch>

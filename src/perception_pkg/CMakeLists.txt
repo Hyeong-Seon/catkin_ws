@@ -15,5 +15,8 @@ catkin_package()
 
 catkin_install_python(PROGRAMS
   scripts/lane_tracking_node.py
+  scripts/speed_sign_node.py
+  scripts/traffic_light_node.py
+  scripts/obstacle_detection_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
