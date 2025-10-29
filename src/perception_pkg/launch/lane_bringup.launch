@@ -5,6 +5,7 @@
   <arg name="debug" default="true" />
   <arg name="default_speed_limit" default="30.0" />
   <arg name="speed_sign_enabled" default="false" />
+  <arg name="speed_sign_model" default="$(find perception_pkg)/models/traffic_sign_detector.pt" />
   <arg name="traffic_light_enabled" default="false" />
   <arg name="obstacle_enabled" default="false" />
   <arg name="lane_marking_enabled" default="false" />
@@ -30,6 +31,7 @@
       <param name="camera_topic" value="$(arg camera_topic)" />
       <param name="use_compressed" value="$(arg use_compressed)" />
       <param name="default_speed_limit" value="$(arg default_speed_limit)" />
+      <param name="pt_model_path" value="$(arg speed_sign_model)" />
     </node>
   </group>
 
