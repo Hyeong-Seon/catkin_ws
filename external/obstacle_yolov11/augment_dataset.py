@@ -1,14 +1,14 @@
 import argparse
 import random
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import albumentations as A
 import cv2
 import numpy as np
 
 
-def read_image(path: Path) -> np.ndarray | None:
+def read_image(path: Path) -> Optional[np.ndarray]:
     """Read image at unicode path using OpenCV."""
     data = np.fromfile(str(path), dtype=np.uint8)
     if data.size == 0:
@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--per-image",
         type=int,
-        default=50,
+        default=10,
         help="Number of augmented samples to create per source image.",
     )
     parser.add_argument(
