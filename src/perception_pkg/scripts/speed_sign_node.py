@@ -27,7 +27,7 @@ class SpeedSignNode:
         # 파라미터
         self.camera_topic = rospy.get_param("~camera_topic", "/camera/image_raw")
         self.use_compressed = rospy.get_param("~use_compressed", False)
-        self.default_speed = float(rospy.get_param("~default_speed_limit", 50.0))
+        self.default_speed = float(rospy.get_param("~default_speed_limit", 30.0))
         self.decay_timeout = rospy.Duration.from_sec(
             float(rospy.get_param("~decay_timeout", 5.0))
         )

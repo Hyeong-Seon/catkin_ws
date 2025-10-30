@@ -33,7 +33,7 @@ class VehicleControlNode:
         self.lookahead_gain = rospy.get_param("~lookahead_gain", 0.4)
         self.lookahead_min = rospy.get_param("~lookahead_min", 3.5)
         self.lookahead_max = rospy.get_param("~lookahead_max", 15.0)
-        self.cruise_speed_kph = rospy.get_param("~cruise_speed_kph", 50.0)
+        self.cruise_speed_kph = rospy.get_param("~cruise_speed_kph", 30.0)
         self.speed_kp = rospy.get_param("~speed_kp", 0.6)
         self.speed_ki = rospy.get_param("~speed_ki", 0.05)
         self.speed_kd = rospy.get_param("~speed_kd", 0.0)

@@ -3,7 +3,7 @@
   <arg name="use_compressed" default="true" />
   <arg name="kp" default="0.6" />
   <arg name="debug" default="true" />
-  <arg name="default_speed_limit" default="50.0" />
+  <arg name="default_speed_limit" default="30.0" />
   <arg name="speed_sign_enabled" default="false" />
   <arg name="speed_sign_model" default="$(find perception_pkg)/models/traffic_sign_detector.pt" />
   <arg name="traffic_light_enabled" default="false" />
