@@ -172,7 +172,8 @@ class VehicleControlNode:
         local_y = -sin_yaw * dx + cos_yaw * dy
 
         # 차선 중심 오프셋을 라디안 각도로 약하게 보정
-        local_y += self.lane_offset * 0.5
+        offset_gain = rospy.get_param("~lane_offset_gain", 0.0)
+        local_y += self.lane_offset * offset_gain
 
         lookahead = math.hypot(local_x, local_y)
         if lookahead < 1e-3:
