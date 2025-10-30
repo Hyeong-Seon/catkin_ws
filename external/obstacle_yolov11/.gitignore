@@ -24,9 +24,11 @@ Thumbs.db
 
 # Training outputs and weights
 runs/
-weights/
+weights/*
+!weights/obstacle_best.pt
 checkpoints/
 *.pt
+!weights/obstacle_best.pt
 *.pth
 *.onnx
 *.ckpt
@@ -41,8 +43,8 @@ labels.cache
 
 # Datasets and generated images (optional to track)
 # 이전에는 dataset/ 전체를 무시했지만, 학습용 데이터를 공유하려면 주석을 해제하거나 삭제하세요.
-#dataset/**
-#!dataset/dataset.yaml
+# dataset
+dataset/
 #dataset_smoke/**
 #!dataset_smoke/dataset.yaml
 raw/**

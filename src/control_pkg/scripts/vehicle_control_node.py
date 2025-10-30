@@ -51,8 +51,10 @@ class VehicleControlNode:
         self.stop_line_detected = False
         self.stop_line_timestamp = rospy.Time(0)
         self.obstacle_detected = False
+        self.obstacle_bias = 0.0
         self.lane_offset = 0.0
         self.speed_state = TargetSpeedState()
+        self.obstacle_bias_gain = rospy.get_param("~obstacle_bias_gain", 0.2)
 
         # 퍼블리셔 / 서브스크라이버 구성
         self.cmd_pub = rospy.Publisher("/ctrl_cmd", CtrlCmd, queue_size=1)
@@ -68,6 +70,9 @@ class VehicleControlNode:
         )
         rospy.Subscriber(
             "/perception/obstacles_2d", Float32MultiArray, self.obstacle_cb, queue_size=1
+        )
+        rospy.Subscriber(
+            "/perception/obstacle_bias", Float32, self.obstacle_bias_cb, queue_size=1
         )
 
         rospy.loginfo("[control] vehicle control node ready (Pure Pursuit).")
@@ -174,6 +179,7 @@ class VehicleControlNode:
         # 차선 중심 오프셋을 라디안 각도로 약하게 보정
         offset_gain = rospy.get_param("~lane_offset_gain", 0.0)
         local_y += self.lane_offset * offset_gain
+        local_y += self.obstacle_bias * self.obstacle_bias_gain
 
         lookahead = math.hypot(local_x, local_y)
         if lookahead < 1e-3:
@@ -201,6 +207,9 @@ class VehicleControlNode:
             target = 0.0
 
         return max(target, 0.0)
+
+    def obstacle_bias_cb(self, msg: Float32) -> None:
+        self.obstacle_bias = float(np.clip(msg.data, -1.0, 1.0))
 
     def _longitudinal_control(self, current_speed: float, target_speed: float) -> Tuple[float, float]:
         now = rospy.Time.now()
