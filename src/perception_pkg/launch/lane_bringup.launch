@@ -8,7 +8,7 @@
   <arg name="speed_sign_model" default="$(find perception_pkg)/models/traffic_sign_detector.pt" />
   <arg name="traffic_light_enabled" default="false" />
   <arg name="traffic_light_model" default="$(find perception_pkg)/models/traffic_sign_detector.pt" />
-  <arg name="obstacle_enabled" default="false" />
+  <arg name="obstacle_enabled" default="true" />
   <arg name="obstacle_model" default="$(find perception_pkg)/../../external/obstacle_yolov11/weights/obstacle_best.pt" />
   <arg name="lane_marking_enabled" default="false" />
 
