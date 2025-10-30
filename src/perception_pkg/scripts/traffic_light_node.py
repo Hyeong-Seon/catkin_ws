@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Sequence
 
 import cv2
 import numpy as np
@@ -81,6 +81,14 @@ class TrafficLightNode:
         self.current_state = "unknown"
         self.last_update = rospy.Time(0)
 
+        self.roi_y_min_ratio = float(rospy.get_param("~roi_y_min_ratio", 0.0))
+        self.roi_y_max_ratio = float(rospy.get_param("~roi_y_max_ratio", 0.55))
+        self.min_aspect_ratio = float(rospy.get_param("~min_aspect_ratio", 0.5))
+        self.max_aspect_ratio = float(rospy.get_param("~max_aspect_ratio", 1.6))
+        self.min_area_ratio = float(rospy.get_param("~min_area_ratio", 0.0004))
+        self.required_hits = int(rospy.get_param("~required_consecutive_hits", 2))
+        self.hit_counter = 0
+
         if self.use_compressed:
             self.sub = rospy.Subscriber(
                 self.camera_topic, CompressedImage, self.compressed_cb, queue_size=1
@@ -113,12 +121,19 @@ class TrafficLightNode:
 
     def handle_frame(self, frame: np.ndarray, stamp: rospy.Time) -> None:
         detections = self.detector.detect(frame)
-        state = self.extract_state(detections)
+        filtered = self.filter_detections(detections, frame.shape)
+        state = self.extract_state(filtered)
 
         if state is not None:
-            self.current_state = state
-            self.last_update = stamp if stamp != rospy.Time() else rospy.Time.now()
+            if state == self.current_state:
+                self.hit_counter = min(self.hit_counter + 1, self.required_hits)
+            else:
+                self.hit_counter = 1
+            if self.hit_counter >= self.required_hits:
+                self.current_state = state
+                self.last_update = stamp if stamp != rospy.Time() else rospy.Time.now()
         else:
+            self.hit_counter = 0
             if (
                 self.unknown_timeout.to_sec() > 0
                 and rospy.Time.now() - self.last_update > self.unknown_timeout
@@ -142,6 +157,30 @@ class TrafficLightNode:
 
     def spin(self) -> None:
         rospy.spin()
+
+    def filter_detections(self, detections, shape: Sequence[int]) -> List[Detection]:
+        h, w = shape[0], shape[1]
+        y_min = int(self.roi_y_min_ratio * h)
+        y_max = int(self.roi_y_max_ratio * h)
+        min_area = self.min_area_ratio * (w * h)
+
+        filtered: List[Detection] = []
+        for det in detections:
+            x1, y1, x2, y2 = det.bbox
+            width = max(float(x2 - x1), 1.0)
+            height = max(float(y2 - y1), 1.0)
+            area = width * height
+            aspect = height / width
+            center_y = (y1 + y2) * 0.5
+
+            if center_y < y_min or center_y > y_max:
+                continue
+            if area < min_area:
+                continue
+            if not (self.min_aspect_ratio <= aspect <= self.max_aspect_ratio):
+                continue
+            filtered.append(det)
+        return filtered
 
     def _load_label_map(self, param_dict) -> Dict[str, str]:
         mapping: Dict[str, str] = {}
