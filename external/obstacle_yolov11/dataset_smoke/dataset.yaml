@@ -1,0 +1,8 @@
+path: C:/Users/kksnh/OneDrive/바탕 화면/obstacle_yolov11/dataset_smoke
+train: images/train
+val: images/val
+test: images/test
+names:
+- cylindrical_cone
+- wall_type_1
+- wall_type_2
